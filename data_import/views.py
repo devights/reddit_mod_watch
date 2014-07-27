@@ -40,7 +40,7 @@ def test_view(request):
     sub = request.GET.get('sub', None)
     user = request.GET.get('user', None)
 
-    mods = Moderator.objects.all().order_by('subreddit__name')
+    mods = Moderator.objects.all().order_by('user__username')
 
     if sub is not None:
         mods.filter(subreddit__name=sub)
