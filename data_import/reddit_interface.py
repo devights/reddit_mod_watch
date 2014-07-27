@@ -5,6 +5,9 @@ import urllib2
 from lxml import etree
 from StringIO import StringIO
 from data_import.models import Moderator, Subreddit, User
+from django.utils import timezone
+
+from datetime import datetime
 
 def get_moderators_by_subreddit(subreddit):
     user_agent = settings.REDDIT_USER_AGENT
@@ -19,18 +22,47 @@ def store_moderators_for_subreddit(subreddit):
         raise
     sub, sub_created = Subreddit.objects.get_or_create(name=subreddit)
     sub.mark_updated()
+
+    mod_names = []
+    for mod in mods:
+        mod_names.append(mod.name)
     if not sub_created:
         #Remove users who are no longer moderators on a subreddit
-        removed_mods = Moderator.objects.filter(is_deleted=False).exclude(user__username__in=mods)
-        for removed_mod in removed_mods:
-            removed_mod.undelete()
+        removed_mods = Moderator.objects.filter(is_deleted=False, subreddit__name=sub.name)\
+            .exclude(user__username__in=mod_names)\
+            .update(is_deleted=True, deleted_on=timezone.now())
 
-    for mod in mods:
-        user, user_created = User.objects.get_or_create(username=mod)
-        moderator, mod_created = Moderator.objects.get_or_create(user=user, subreddit=sub)
-        if not mod_created:
-            #Update last updated date
-            moderator.save()
+    users_to_update = User.objects.filter(username__in=mod_names)
+    update_usernames = []
+    for user in users_to_update:
+        update_usernames.append(user.username)
+    users_to_create = list(set(mod_names) - set(update_usernames))
+
+    user_objects = []
+    for user in users_to_create:
+        user_obj = User(username=user)
+        user_objects.append(user_obj)
+        # user_dict[user_obj.username] = user_obj
+    User.objects.bulk_create(user_objects)
+
+    user_dict = {}
+    mod_users = User.objects.filter(username__in=mod_names)
+    for mod_user in mod_users:
+        user_dict[mod_user.username] = mod_user
+
+    mods_to_update = Moderator.objects.filter(subreddit=sub, user__username__in=mod_names)
+    mods_to_update.update(last_updated=timezone.now())
+
+    existing_mods = []
+    for mod in mods_to_update:
+        existing_mods.append(mod.user.username)
+
+    mods_to_create = list(set(mod_names) - set(existing_mods))
+
+    mod_objects = []
+    for mod in mods_to_create:
+        mod_objects.append(Moderator(subreddit=sub, user=user_dict[mod], last_updated=timezone.now()))
+    Moderator.objects.bulk_create(mod_objects)
 
 
 def get_modded_subs_by_user(user):
@@ -42,6 +74,7 @@ def get_modded_subs_by_user(user):
         html = urllib2.urlopen(req).read()
     except Exception as ex:
         print ex
+        print url
         raise
 
     parser = etree.HTMLParser()
