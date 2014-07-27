@@ -7,10 +7,50 @@
     <canvas id="myChart" width="400" height="400"></canvas>
 
     </body>
+    <script src="static/js/Chart.min.js" type="text/javascript"> </script>
     <script>
         var ctx = document.getElementById("myChart").getContext("2d");
+        var data = {
+            labels: [{% for point in labels %} "{{ point }}", {% endfor %}],
+            datasets: [
+                {
+                    label: "My First dataset",
+                    fillColor: "rgba(220,220,220,0.5)",
+                    strokeColor: "rgba(220,220,220,0.8)",
+                    highlightFill: "rgba(220,220,220,0.75)",
+                    highlightStroke: "rgba(220,220,220,1)",
+                    data: [{% for point in values %} {{ point }}, {% endfor %}]
+                }
+            ]
+        };
+        var options = {
+            //Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+            scaleBeginAtZero : true,
+
+            //Boolean - Whether grid lines are shown across the chart
+            scaleShowGridLines : true,
+
+            //String - Colour of the grid lines
+            scaleGridLineColor : "rgba(0,0,0,.05)",
+
+            //Number - Width of the grid lines
+            scaleGridLineWidth : 1,
+
+            //Boolean - If there is a stroke on each bar
+            barShowStroke : true,
+
+            //Number - Pixel width of the bar stroke
+            barStrokeWidth : 2,
+
+            //Number - Spacing between each of the X value sets
+            barValueSpacing : 5,
+
+            //Number - Spacing between data sets within X values
+            barDatasetSpacing : 1
+        }
         var myBarChart = new Chart(ctx).Bar(data, options);
 
     </script>
-    <script src="static/js/Chart.min.js" />
+
+
 </hmtl>

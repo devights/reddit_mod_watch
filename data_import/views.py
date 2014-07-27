@@ -32,8 +32,8 @@ def sub_bar_chart(request):
 
 
     # return HttpResponse(json.dumps(subreddit_mod_count))
-    return render_to_response('subreddit_bar.html',{'labels': json.dumps(labels),
-                                                    'values': json.dumps(values)})
+    return render_to_response('subreddit_bar.html',{'labels': labels,
+                                                    'values': values})
 
 
 def test_view(request):
