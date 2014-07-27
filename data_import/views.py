@@ -28,7 +28,6 @@ def sub_bar_chart(request):
 
     values, labels = zip(*sorted(zip(values, labels), reverse=True))
 
-    # return HttpResponse(json.dumps(subreddit_mod_count))
     return render_to_response('subreddit_bar.html', {'labels': labels,
                                                      'values': values})
 
