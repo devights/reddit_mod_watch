@@ -12,7 +12,11 @@ def get_moderators_by_subreddit(subreddit):
     return reddit.get_subreddit(subreddit).get_moderators()
 
 def store_moderators_for_subreddit(subreddit):
-    mods = get_moderators_by_subreddit(subreddit)
+    try:
+        mods = get_moderators_by_subreddit(subreddit)
+    except Exception as e:
+        print e
+        raise
     sub, sub_created = Subreddit.objects.get_or_create(name=subreddit)
     sub.mark_updated()
     if not sub_created:
@@ -38,6 +42,7 @@ def get_modded_subs_by_user(user):
         html = urllib2.urlopen(req).read()
     except Exception as ex:
         print ex
+        raise
 
     parser = etree.HTMLParser()
     tree = etree.parse(StringIO(html), parser)
@@ -63,8 +68,9 @@ def get_modded_subs_by_user(user):
 
 
     #Remove deleted mods
-    removed_mods = Moderator.objects.filter(is_deleted=False).exclude(subreddit__name__in=subreddits)
+    removed_mods = Moderator.objects.filter(is_deleted=False, user__username=username).exclude(subreddit__name__in=subreddits)
     for removed_mod in removed_mods:
+        list = ", ".join(subreddits)
         removed_mod.mark_deleted()
     user.mark_updated()
 

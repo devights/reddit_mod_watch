@@ -8,6 +8,7 @@ class Subreddit(models.Model):
 
     def mark_updated(self):
         self.last_updated = timezone.now()
+        self.save()
 
 class User(models.Model):
     username = models.CharField(max_length=20, unique=True, db_index=True)
@@ -16,6 +17,7 @@ class User(models.Model):
 
     def mark_updated(self):
         self.last_updated = timezone.now()
+        self.save()
 
 class Moderator(models.Model):
     user = models.ForeignKey('User')
