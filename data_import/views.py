@@ -1,8 +1,10 @@
+from __future__ import division
 from data_import.models import Subreddit, User, Moderator
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from collections import defaultdict
 from django.db.models import Count
+
 
 
 def sub_bar_chart(request):
@@ -38,6 +40,40 @@ def top_moderators(request):
         .annotate(total=Count('user__username'))\
         .order_by('-total')[:fetch_count]
     return render_to_response('top_mods.html', {'mods': mods})
+
+
+def compare_subs(request):
+    sub_1 = request.GET.get('sub1', None)
+    sub_2 = request.GET.get('sub2', None)
+
+    try:
+        sub_1 = Subreddit.objects.get(name=sub_1)
+        sub_2 = Subreddit.objects.get(name=sub_2)
+
+        sub1_mods = []
+        sub2_mods = []
+        for mod in Moderator.objects.filter(subreddit=sub_1):
+            sub1_mods.append(mod.user.username)
+        for mod in Moderator.objects.filter(subreddit=sub_2):
+            sub2_mods.append(mod.user.username)
+
+        similar = set(sub1_mods).intersection(set(sub2_mods))
+
+        data = {'similar_count': len(similar),
+                'sub1_name': sub_1.name,
+                'sub1_mod_count': len(sub1_mods),
+                'sub1_percent': round(((len(similar) / len(sub1_mods)) * 100), 2),
+                'sub2_name': sub_2.name,
+                'sub2_mod_count': len(sub2_mods),
+                'sub2_percent': round(((len(similar) / len(sub2_mods)) * 100), 2)}
+        return render_to_response('compare_subs.html', data)
+    except Exception:
+        return HttpResponseBadRequest()
+
+
+
+
+
 
 
 def test_view(request):
