@@ -1,5 +1,5 @@
 from django.db import models
-from datetime import datetime
+from django.utils import timezone
 
 class Subreddit(models.Model):
     name = models.CharField(max_length=20, unique=True, db_index=True)
@@ -7,7 +7,7 @@ class Subreddit(models.Model):
     added_on = models.DateTimeField(auto_now_add=True)
 
     def mark_updated(self):
-        self.last_updated = datetime.now()
+        self.last_updated = timezone.now()
 
 class User(models.Model):
     username = models.CharField(max_length=20, unique=True, db_index=True)
@@ -15,7 +15,7 @@ class User(models.Model):
     added_on = models.DateTimeField(auto_now_add=True)
 
     def mark_updated(self):
-        self.last_updated = datetime.now()
+        self.last_updated = timezone.now()
 
 class Moderator(models.Model):
     user = models.ForeignKey('User')
@@ -27,7 +27,7 @@ class Moderator(models.Model):
 
     def mark_deleted(self):
         self.is_deleted = True
-        self.deleted_on = datetime.now()
+        self.deleted_on = timezone.now()
         self.save()
 
     def undelete(self):
