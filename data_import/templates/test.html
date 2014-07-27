@@ -1,0 +1,25 @@
+<html>
+<body>
+<table border="1">
+    <tr>
+        <td>sub</td>
+        <td>user</td>
+        <td>added</td>
+        <td>updated</td>
+        <td>is deleted</td>
+        <td>deleted on</td>
+    </tr>
+    {% for mod in mods %}
+        <tr>
+            <td>{{ mod.subreddit }}</td>
+            <td>{{ mod.user }}</td>
+            <td>{{ mod.added }}</td>
+            <td>{{ mod.updated }}</td>
+            <td>{{ mod.is_deleted }}</td>
+            <td>{{ mod.deleted }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+</body>
+</html>
