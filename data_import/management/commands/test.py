@@ -21,8 +21,6 @@ class Command(BaseCommand):
 
         users = User.objects.filter(last_updated=None)
         for user in users:
-            if user.username == "AutoModerator":
-                continue
             start = datetime.now()
             get_modded_subs_by_user(user)
             time_taken = (datetime.now() - start).seconds
