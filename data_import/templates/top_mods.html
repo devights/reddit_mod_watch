@@ -1,0 +1,17 @@
+<html>
+<body>
+<table border="1">
+    <tr>
+        <td>Moderator</td>
+        <td>Subreddits</td>
+    </tr>
+    {% for mod in mods %}
+        <tr>
+            <td>{{ mod.user__username }}</td>
+            <td>{{ mod.total }}</td>
+        </tr>
+    {% endfor %}
+
+</table>
+</body>
+</html>

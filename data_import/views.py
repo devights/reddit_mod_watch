@@ -2,6 +2,7 @@ from data_import.models import Subreddit, User, Moderator
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from collections import defaultdict
+from django.db.models import Count
 
 
 def sub_bar_chart(request):
@@ -30,6 +31,14 @@ def sub_bar_chart(request):
     # return HttpResponse(json.dumps(subreddit_mod_count))
     return render_to_response('subreddit_bar.html', {'labels': labels,
                                                      'values': values})
+
+
+def top_moderators(request):
+    fetch_count = request.GET.get('count', 10)
+    mods = Moderator.objects.all().values('user__username')\
+        .annotate(total=Count('user__username'))\
+        .order_by('-total')[:fetch_count]
+    return render_to_response('top_mods.html', {'mods': mods})
 
 
 def test_view(request):
