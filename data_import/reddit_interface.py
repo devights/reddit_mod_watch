@@ -71,6 +71,12 @@ def get_modded_subs_by_user(user):
     req = urllib2.Request(url, headers=hdr)
     try:
         html = urllib2.urlopen(req).read()
+    except urllib2.URLError, e:
+        if e.code == 404:
+            user.is_private = True
+            user.last_updated = timezone.now()
+            user.save()
+            raise
     except Exception as ex:
         print ex
         print url
@@ -121,6 +127,7 @@ def get_modded_subs_by_user(user):
     #Remove deleted mods
     removed_mods = Moderator.objects.filter(is_deleted=False, user__username=username).exclude(subreddit__name__in=subreddits)
     removed_mods.update(is_deleted=True, deleted_on=timezone.now())
+    user.is_private = False
     user.mark_updated()
 
 def _clean_sub_name(sub_text):
