@@ -42,7 +42,6 @@ def store_moderators_for_subreddit(subreddit):
     for user in users_to_create:
         user_obj = User(username=user)
         user_objects.append(user_obj)
-        # user_dict[user_obj.username] = user_obj
     User.objects.bulk_create(user_objects)
 
     user_dict = {}
@@ -88,23 +87,40 @@ def get_modded_subs_by_user(user):
         li = row.getchildren()[0]
         subreddit = _clean_sub_name(li.text)
         subreddits.append(subreddit)
+    existing_subs = Subreddit.objects.filter(name__in=subreddits)
+    existing_subs.update(last_updated=timezone.now())
 
-        sub, sub_created = Subreddit.objects.get_or_create(name=subreddit)
-        try:
-            moderator = Moderator.objects.get(user_id=user.id, subreddit_id=sub.id)
-            moderator.save()
-            if moderator.is_deleted:
-                moderator.undelete()
-        except Moderator.DoesNotExist:
-            mod = Moderator(user=user, subreddit=sub)
-            mod.save()
+    existing_subs_names = []
+    for existing_sub in existing_subs:
+        existing_subs_names.append(existing_sub.name)
+
+    sub_names_to_create = list(set(subreddits) - set(existing_subs_names))
+    sub_objects = []
+    for name in sub_names_to_create:
+        sub_objects.append(Subreddit(name=name))
+    Subreddit.objects.bulk_create(sub_objects)
+
+    sub_dict = {}
+    for subreddit_object in Subreddit.objects.filter(name__in=subreddits):
+        sub_dict[subreddit_object.name] = subreddit_object
+
+    existing_modded_subs = Moderator.objects.filter(user__username=user.username, subreddit__name__in=subreddits, is_deleted=False)
+    existing_modded_subs.update(last_updated=timezone.now())
+
+    existing_mod_sub_names = []
+    for ems in existing_modded_subs:
+        existing_mod_sub_names.append(ems.subreddit.name)
+
+    mods_to_create = list(set(subreddits) - set(existing_mod_sub_names))
+    mod_objs = []
+    for mtc in mods_to_create:
+        mod_objs.append(Moderator(user=user, subreddit=sub_dict[mtc], last_updated=timezone.now()))
+    Moderator.objects.bulk_create(mod_objs)
 
 
     #Remove deleted mods
     removed_mods = Moderator.objects.filter(is_deleted=False, user__username=username).exclude(subreddit__name__in=subreddits)
-    for removed_mod in removed_mods:
-        list = ", ".join(subreddits)
-        removed_mod.mark_deleted()
+    removed_mods.update(is_deleted=True, deleted_on=timezone.now())
     user.mark_updated()
 
 def _clean_sub_name(sub_text):
