@@ -35,7 +35,7 @@ def store_moderators_for_subreddit(subreddit):
 
 def get_modded_subs_by_user(user):
     username = user.username
-    hdr = { 'User-Agent' : 'rmw test client v0.1' }
+    hdr = { 'User-Agent' : settings.REDDIT_USER_AGENT }
     url = "http://www.reddit.com/user/%s" % user.username
     req = urllib2.Request(url, headers=hdr)
     try:
