@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+
 class Subreddit(models.Model):
     name = models.CharField(max_length=20, unique=True, db_index=True)
     last_updated = models.DateTimeField(null=True)
@@ -9,6 +10,7 @@ class Subreddit(models.Model):
     def mark_updated(self):
         self.last_updated = timezone.now()
         self.save()
+
 
 class User(models.Model):
     username = models.CharField(max_length=20, unique=True, db_index=True)
@@ -19,6 +21,7 @@ class User(models.Model):
     def mark_updated(self):
         self.last_updated = timezone.now()
         self.save()
+
 
 class Moderator(models.Model):
     user = models.ForeignKey('User')

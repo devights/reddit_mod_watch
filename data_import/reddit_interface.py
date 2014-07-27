@@ -1,18 +1,17 @@
 import praw
 from django.conf import settings
-from praw.errors import RedirectException
 import urllib2
 from lxml import etree
 from StringIO import StringIO
 from data_import.models import Moderator, Subreddit, User
 from django.utils import timezone
 
-from datetime import datetime
 
 def get_moderators_by_subreddit(subreddit):
     user_agent = settings.REDDIT_USER_AGENT
     reddit = praw.Reddit(user_agent=user_agent)
     return reddit.get_subreddit(subreddit).get_moderators()
+
 
 def store_moderators_for_subreddit(subreddit):
     try:
@@ -28,7 +27,7 @@ def store_moderators_for_subreddit(subreddit):
         mod_names.append(mod.name)
     if not sub_created:
         #Remove users who are no longer moderators on a subreddit
-        removed_mods = Moderator.objects.filter(is_deleted=False, subreddit__name=sub.name)\
+        Moderator.objects.filter(is_deleted=False, subreddit__name=sub.name)\
             .exclude(user__username__in=mod_names)\
             .update(is_deleted=True, deleted_on=timezone.now())
 
@@ -66,7 +65,7 @@ def store_moderators_for_subreddit(subreddit):
 
 def get_modded_subs_by_user(user):
     username = user.username
-    hdr = { 'User-Agent' : settings.REDDIT_USER_AGENT }
+    hdr = {'User-Agent': settings.REDDIT_USER_AGENT}
     url = "http://www.reddit.com/user/%s" % user.username
     req = urllib2.Request(url, headers=hdr)
     try:
@@ -110,7 +109,9 @@ def get_modded_subs_by_user(user):
     for subreddit_object in Subreddit.objects.filter(name__in=subreddits):
         sub_dict[subreddit_object.name] = subreddit_object
 
-    existing_modded_subs = Moderator.objects.filter(user__username=user.username, subreddit__name__in=subreddits, is_deleted=False)
+    existing_modded_subs = Moderator.objects.filter(user__username=user.username,
+                                                    subreddit__name__in=subreddits,
+                                                    is_deleted=False)
     existing_modded_subs.update(last_updated=timezone.now())
 
     existing_mod_sub_names = []
@@ -120,15 +121,19 @@ def get_modded_subs_by_user(user):
     mods_to_create = list(set(subreddits) - set(existing_mod_sub_names))
     mod_objs = []
     for mtc in mods_to_create:
-        mod_objs.append(Moderator(user=user, subreddit=sub_dict[mtc], last_updated=timezone.now()))
+        mod_objs.append(Moderator(user=user,
+                                  subreddit=sub_dict[mtc],
+                                  last_updated=timezone.now()))
     Moderator.objects.bulk_create(mod_objs)
 
-
     #Remove deleted mods
-    removed_mods = Moderator.objects.filter(is_deleted=False, user__username=username).exclude(subreddit__name__in=subreddits)
+    removed_mods = Moderator.objects.filter(is_deleted=False,
+                                            user__username=username)\
+        .exclude(subreddit__name__in=subreddits)
     removed_mods.update(is_deleted=True, deleted_on=timezone.now())
     user.is_private = False
     user.mark_updated()
+
 
 def _clean_sub_name(sub_text):
     return sub_text.replace('/r/', '')

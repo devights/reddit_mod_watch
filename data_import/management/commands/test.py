@@ -1,20 +1,13 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from data_import.reddit_interface import get_modded_subs_by_user, store_moderators_for_subreddit
 from data_import.models import User, Subreddit
 from datetime import datetime
 from time import sleep
 
+
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
-
-    def add_arguments(self, parser):
-        parser.add_argument('poll_id', nargs='+', type=int)
-
     def handle(self, *args, **options):
         store_moderators_for_subreddit("holocaust")
-
-        # user = User.objects.get(username='sodypop')
-        # get_modded_subs_by_user(user)
         sub_start = datetime.now()
         subs = Subreddit.objects.filter(last_updated=None)
         for sub in subs:
@@ -44,6 +37,3 @@ class Command(BaseCommand):
 
         print "Added %s subs in %s seconds \nand %s users in %s seconds)"\
               % (len(subs), sub_time, len(users), user_time)
-
-
-
