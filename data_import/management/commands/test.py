@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
-from data_import.reddit_interface import get_modded_subs_by_user, store_moderators_for_subreddit
+from data_import.reddit_interface \
+    import get_modded_subs_by_user, store_moderators_for_subreddit
 from data_import.models import User, Subreddit
 from datetime import datetime
 from time import sleep
