@@ -10,6 +10,6 @@ before_script:
   - python manage.py syncdb --noinput
 script:
   - pep8 data_import/ --exclude=migrations,data_import/test
-#  - coverage run --source=myuw_mobile/ manage.py test myuw_mobile
-#after_script:
-#  - coveralls
+  - coverage run --source=myuw_mobile/ manage.py test myuw_mobile
+after_script:
+  - coveralls
