@@ -1,0 +1,15 @@
+language: python
+python:
+  - "2.7"
+install: pip install -r requirements.txt
+before_script:
+  - pip install coverage
+  - pip install python-coveralls
+  - pip install pep8
+  - cp travis-ci/manage.py manage.py
+  - python manage.py syncdb --noinput
+script:
+  - pep8 data_import/ --exclude=migrations,data_import/test
+#  - coverage run --source=myuw_mobile/ manage.py test myuw_mobile
+#after_script:
+#  - coveralls
