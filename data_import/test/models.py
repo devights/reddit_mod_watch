@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.db import IntegrityError
-from data_import.models import Subreddit, User
+from data_import.models import Subreddit, User, Moderator
 
 
 class TestSubredditModel(TestCase):
@@ -46,3 +46,34 @@ class TestUserModel(TestCase):
         with self.assertRaises(IntegrityError):
             u2 = User(username="dupe")
             u2.save()
+
+
+class TestModerator(TestCase):
+    def test_creation(self):
+        user = User(username="test")
+        user.save()
+        subreddit = Subreddit(name="sub")
+        subreddit.save()
+
+        mod = Moderator(user=user, subreddit=subreddit)
+        mod.save()
+
+        self.assertEqual(mod.subreddit, subreddit)
+        self.assertEqual(mod.user, user)
+        self.assertFalse(mod.is_deleted)
+        self.assertIsNone(mod.deleted_on)
+        self.assertIsNotNone(mod.added_on)
+
+    def test_deletion(self):
+        user = User(username="test")
+        user.save()
+        subreddit = Subreddit(name="sub")
+        subreddit.save()
+
+        mod = Moderator(user=user, subreddit=subreddit)
+        mod.save()
+        mod.mark_deleted()
+        self.assertTrue(mod.is_deleted)
+
+        mod.undelete()
+        self.assertFalse(mod.is_deleted)
