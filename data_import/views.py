@@ -6,7 +6,6 @@ from collections import defaultdict
 from django.db.models import Count
 
 
-
 def sub_bar_chart(request):
     sub = request.GET.get('sub', None)
     if sub is None:
@@ -17,7 +16,8 @@ def sub_bar_chart(request):
 
     subreddit_mod_count = defaultdict(int)
     for mod in moderators:
-        subs_moded_by_user = Moderator.objects.filter(user__id=mod.user.id).exclude(subreddit__id=subreddit.id)
+        subs_moded_by_user = Moderator.objects.filter(user__id=mod.user.id)\
+            .exclude(subreddit__id=subreddit.id)
         for sub_modded in subs_moded_by_user:
             subreddit_mod_count[sub_modded.subreddit.name] += 1
 
@@ -62,18 +62,15 @@ def compare_subs(request):
         data = {'similar_count': len(similar),
                 'sub1_name': sub_1.name,
                 'sub1_mod_count': len(sub1_mods),
-                'sub1_percent': round(((len(similar) / len(sub1_mods)) * 100), 2),
+                'sub1_percent': round(((len(similar)
+                                        / len(sub1_mods)) * 100), 2),
                 'sub2_name': sub_2.name,
                 'sub2_mod_count': len(sub2_mods),
-                'sub2_percent': round(((len(similar) / len(sub2_mods)) * 100), 2)}
+                'sub2_percent': round(((len(similar)
+                                        / len(sub2_mods)) * 100), 2)}
         return render_to_response('compare_subs.html', data)
     except Exception:
         return HttpResponseBadRequest()
-
-
-
-
-
 
 
 def test_view(request):
@@ -97,4 +94,4 @@ def test_view(request):
                    'is_deleted': mod.is_deleted,
                    'deleted': str(mod.deleted_on)}
         mod_output.append(mod_rep)
-    return render_to_response('test.html', {'mods':mod_output})
+    return render_to_response('test.html', {'mods': mod_output})
