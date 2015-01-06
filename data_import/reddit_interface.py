@@ -26,7 +26,7 @@ def store_moderators_for_subreddit(subreddit):
     for mod in mods:
         mod_names.append(mod.name)
     if not sub_created:
-        #Remove users who are no longer moderators on a subreddit
+        # Remove users who are no longer moderators on a subreddit
         Moderator.objects.filter(is_deleted=False, subreddit__name=sub.name)\
             .exclude(user__username__in=mod_names)\
             .update(is_deleted=True, deleted_on=timezone.now())
@@ -48,7 +48,8 @@ def store_moderators_for_subreddit(subreddit):
     for mod_user in mod_users:
         user_dict[mod_user.username] = mod_user
 
-    mods_to_update = Moderator.objects.filter(subreddit=sub, user__username__in=mod_names)
+    mods_to_update = Moderator.objects.filter(subreddit=sub,
+                                              user__username__in=mod_names)
     mods_to_update.update(last_updated=timezone.now())
 
     existing_mods = []
@@ -59,7 +60,9 @@ def store_moderators_for_subreddit(subreddit):
 
     mod_objects = []
     for mod in mods_to_create:
-        mod_objects.append(Moderator(subreddit=sub, user=user_dict[mod], last_updated=timezone.now()))
+        mod_objects.append(Moderator(subreddit=sub,
+                                     user=user_dict[mod],
+                                     last_updated=timezone.now()))
     Moderator.objects.bulk_create(mod_objects)
 
 
@@ -106,12 +109,14 @@ def get_modded_subs_by_user(user):
     Subreddit.objects.bulk_create(sub_objects)
 
     sub_dict = {}
-    for subreddit_object in Subreddit.objects.filter(name__in=subreddits):
+    for subreddit_object in \
+            Subreddit.objects.filter(name__in=subreddits):
         sub_dict[subreddit_object.name] = subreddit_object
 
-    existing_modded_subs = Moderator.objects.filter(user__username=user.username,
-                                                    subreddit__name__in=subreddits,
-                                                    is_deleted=False)
+    existing_modded_subs = \
+        Moderator.objects.filter(user__username=user.username,
+                                 subreddit__name__in=subreddits,
+                                 is_deleted=False)
     existing_modded_subs.update(last_updated=timezone.now())
 
     existing_mod_sub_names = []
@@ -126,7 +131,7 @@ def get_modded_subs_by_user(user):
                                   last_updated=timezone.now()))
     Moderator.objects.bulk_create(mod_objs)
 
-    #Remove deleted mods
+    # Remove deleted mods
     removed_mods = Moderator.objects.filter(is_deleted=False,
                                             user__username=username)\
         .exclude(subreddit__name__in=subreddits)
