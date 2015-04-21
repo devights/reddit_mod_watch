@@ -14,11 +14,17 @@ def get_moderators_by_subreddit(subreddit):
 
 
 def store_moderators_for_subreddit(subreddit):
+    mods = None
     try:
         mods = get_moderators_by_subreddit(subreddit)
     except Exception as e:
         print e
         raise
+    if mods is not None:
+        _store_moderators_for_subreddit(subreddit, mods)
+
+
+def _store_moderators_for_subreddit(subreddit, mods):
     sub, sub_created = Subreddit.objects.get_or_create(name=subreddit)
     sub.mark_updated()
 

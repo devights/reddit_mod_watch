@@ -95,3 +95,4 @@ def test_view(request):
                    'deleted': str(mod.deleted_on)}
         mod_output.append(mod_rep)
     return render_to_response('test.html', {'mods': mod_output})
+
