@@ -73,23 +73,24 @@ def _store_moderators_for_subreddit(subreddit, mods):
 
 
 def get_modded_subs_by_user(user):
-    username = user.username
-    hdr = {'User-Agent': settings.REDDIT_USER_AGENT}
-    url = "http://www.reddit.com/user/%s" % user.username
-    req = urllib2.Request(url, headers=hdr)
+    user_doc = None
     try:
-        html = urllib2.urlopen(req).read()
+        user_doc = _get_user_profile(user)
     except urllib2.URLError, e:
         if e.code == 404:
             user.is_private = True
             user.last_updated = timezone.now()
             user.save()
-            raise
-    except Exception as ex:
-        print ex
-        print url
-        raise
+    if user_doc is not None:
+        _parse_user_profile(user, user_doc)
 
+def _get_user_profile(user):
+    hdr = {'User-Agent': settings.REDDIT_USER_AGENT}
+    url = "http://www.reddit.com/user/%s" % user.username
+    req = urllib2.Request(url, headers=hdr)
+    return urllib2.urlopen(req).read()
+
+def _parse_user_profile(user, html):
     parser = etree.HTMLParser()
     tree = etree.parse(StringIO(html), parser)
 
@@ -139,7 +140,7 @@ def get_modded_subs_by_user(user):
 
     # Remove deleted mods
     removed_mods = Moderator.objects.filter(is_deleted=False,
-                                            user__username=username)\
+                                            user__username=user.username)\
         .exclude(subreddit__name__in=subreddits)
     removed_mods.update(is_deleted=True, deleted_on=timezone.now())
     user.is_private = False

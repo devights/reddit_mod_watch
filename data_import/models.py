@@ -6,6 +6,8 @@ class Subreddit(models.Model):
     name = models.CharField(max_length=20, unique=True, db_index=True)
     last_updated = models.DateTimeField(null=True)
     added_on = models.DateTimeField(auto_now_add=True)
+    member_count = models.PositiveIntegerField(null=True)
+    priority = models.PositiveIntegerField(default=1)
 
     def mark_updated(self):
         self.last_updated = timezone.now()
