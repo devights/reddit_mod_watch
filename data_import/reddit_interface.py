@@ -85,12 +85,14 @@ def get_modded_subs_by_user(user):
     if user_doc is not None:
         _parse_user_profile(user, user_doc)
 
+
 def _get_user_profile(user):
     hdr = {'User-Agent': settings.REDDIT_USER_AGENT}
     url = "http://www.reddit.com/user/%s" % user.username
     req = urllib2.Request(url, headers=hdr)
     response = urllib2.urlopen(req)
     return response.read()
+
 
 def _parse_user_profile(user, html):
     parser = etree.HTMLParser()

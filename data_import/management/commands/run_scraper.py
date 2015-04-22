@@ -13,5 +13,3 @@ class Command(DaemonCommand):
         user_count = User.objects.all().count()
         sub_count = Subreddit.objects.all().count()
         import_log.info("%s users\n%s subs" % (user_count, sub_count))
-
-

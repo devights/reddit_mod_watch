@@ -58,16 +58,15 @@ def compare_subs(request):
             sub2_mods.append(mod.user.username)
 
         similar = set(sub1_mods).intersection(set(sub2_mods))
-
+        sub1_percent = round(((len(similar) / len(sub1_mods)) * 100), 2)
+        sub2_percent = round(((len(similar) / len(sub2_mods)) * 100), 2)
         data = {'similar_count': len(similar),
                 'sub1_name': sub_1.name,
                 'sub1_mod_count': len(sub1_mods),
-                'sub1_percent': round(((len(similar)
-                                        / len(sub1_mods)) * 100), 2),
+                'sub1_percent': sub1_percent,
                 'sub2_name': sub_2.name,
                 'sub2_mod_count': len(sub2_mods),
-                'sub2_percent': round(((len(similar)
-                                        / len(sub2_mods)) * 100), 2)}
+                'sub2_percent': sub2_percent}
         return render_to_response('compare_subs.html', data)
     except Exception:
         return HttpResponseBadRequest()
@@ -95,4 +94,3 @@ def test_view(request):
                    'deleted': str(mod.deleted_on)}
         mod_output.append(mod_rep)
     return render_to_response('test.html', {'mods': mod_output})
-
