@@ -5,6 +5,7 @@ from lxml import etree
 from StringIO import StringIO
 from data_import.models import Moderator, Subreddit, User
 from django.utils import timezone
+from django.conf import settings
 
 
 def get_moderators_by_subreddit(subreddit):
@@ -88,7 +89,8 @@ def _get_user_profile(user):
     hdr = {'User-Agent': settings.REDDIT_USER_AGENT}
     url = "http://www.reddit.com/user/%s" % user.username
     req = urllib2.Request(url, headers=hdr)
-    return urllib2.urlopen(req).read()
+    response = urllib2.urlopen(req)
+    return response.read()
 
 def _parse_user_profile(user, html):
     parser = etree.HTMLParser()

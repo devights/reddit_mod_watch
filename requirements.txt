@@ -7,3 +7,4 @@ requests
 six
 update-checker
 wsgiref
+git+https://github.com/danielroseman/django-initd.git
